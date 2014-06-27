@@ -47,12 +47,13 @@ def input_cohort
 	cohort = (Time.new(Time.now.year, cohort.to_i).strftime "%B").to_sym
 end
 
-def check_input(name, age, cohort)
+def confirm_and_save_input(name, age, cohort)
 	puts "Your input is #{name}, #{age}, #{cohort}. Are you sure? (y/n)"
 	confirmation = STDIN.gets.chomp
 	
 	if confirmation == "y"
 		update_students_hash(name, age, cohort) 
+		puts "Now we have #{@students.length} student#{@students.length > 1 ? "s" : ""}"
 	elsif confirmation == "n"
 		puts "Please re-enter your name"
 		name = STDIN.gets.chomp
@@ -61,8 +62,7 @@ def check_input(name, age, cohort)
 end
 
 def update_students_hash(name, age, cohort)
-	@students << {:name => name, :age => age, :cohort => cohort}
-	puts "Now we have #{@students.length} student#{@students.length > 1 ? "s" : ""}"
+	@students << {:name => name, :age => age, :cohort => cohort.to_sym}
 end
 
 def input_students
@@ -74,7 +74,7 @@ def get_students_info(name)
 	while !name.empty? do
 		age = input_age
 		cohort = input_cohort
-		check_input(name, age, cohort)
+		confirm_and_save_input(name, age, cohort)
 		puts "Please enter another name OR press return for Menu"
 		name = STDIN.gets.chomp
 	end
@@ -127,7 +127,7 @@ def load_students(filename = "students.csv")
 	file = File.open(filename, "r")
 	file.readlines.each do |line|
 		name, age, cohort = line.chomp.split(',')
-			@students << {:name => name, :age => age, :cohort => cohort.to_sym}
+			update_students_hash(name, age, cohort)
 	end
 	file.close
 end
