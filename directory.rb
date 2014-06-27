@@ -22,15 +22,15 @@ end
 def input_name
 		puts "Please enter your name"
 		# get the first name
-		name = gets.chomp
+		name = STDIN.gets.chomp
 end
 
 def input_age
 	puts "Please enter your age"
-	age = gets.chomp
+	age = STDIN.gets.chomp
 	while ( age.to_i == 0 || age.to_i < 0 )
 		puts "Please enter a numeric value for your age"
-		age = gets.chomp
+		age = STDIN.gets.chomp
 	end
 
 	age
@@ -39,7 +39,7 @@ end
 def input_cohort
 	puts "Please enter a number between 1-12 for the month of your cohort (1-January, etc)"
 	# get cohort month, if nothing entered default to 6 (june)
-	cohort = gets.chomp
+	cohort = STDIN.gets.chomp
 	if cohort.empty?
 		cohort = "6" 
 	end
@@ -49,16 +49,20 @@ end
 
 def check_input(name, age, cohort)
 	puts "Your input is #{name}, #{age}, #{cohort}. Are you sure? (y/n)"
-	confirmation = gets.chomp
+	confirmation = STDIN.gets.chomp
 	
 	if confirmation == "y"
-		#add the student hash to the array
-		@students << {:name => name, :age => age, :cohort => cohort}
-		puts "Now we have #{@students.length} student#{@students.length > 1 ? "s" : ""}" 
+		update_students_hash(name, age, cohort) 
 	elsif confirmation == "n"
 		puts "Please re-enter your name"
-		name = gets.chomp
+		name = STDIN.gets.chomp
 	end
+
+end
+
+def update_students_hash(name, age, cohort)
+	@students << {:name => name, :age => age, :cohort => cohort}
+	puts "Now we have #{@students.length} student#{@students.length > 1 ? "s" : ""}"
 end
 
 def input_students
@@ -72,7 +76,7 @@ def get_students_info(name)
 		cohort = input_cohort
 		check_input(name, age, cohort)
 		puts "Please enter another name OR press return for Menu"
-		name = gets.chomp
+		name = STDIN.gets.chomp
 	end
 end
 
@@ -119,8 +123,8 @@ def save_students
 	file.close
 end
 
-def load_students
-	file = File.open("students.csv", "r")
+def load_students(filename = "students.csv")
+	file = File.open(filename, "r")
 	file.readlines.each do |line|
 		name, age, cohort = line.chomp.split(',')
 			@students << {:name => name, :age => age, :cohort => cohort.to_sym}
@@ -128,14 +132,26 @@ def load_students
 	file.close
 end
 
+def try_load_students
+	filename = ARGV.first
+	return if filename.nil?
+	if File.exists?(filename)
+		load_students(filename)
+		puts "Loaded #{@students.length} from #{filename}"
+	else
+		puts "Sorry #{filename} does not exist"
+		exit
+	end
+end
+
 def interactive_menu
 	@students = []
+	try_load_students
 	loop do
 		# 1. print the menu and ask the user what to do
 		print_menu
 		# 2. read the input and save it into a variable
-		process(gets.chomp)
-
+		process(STDIN.gets.chomp)
 	end
 end
 
